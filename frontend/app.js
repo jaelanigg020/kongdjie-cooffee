@@ -1,4 +1,4 @@
-        const API_BASE = "/api";
+const API_BASE = "https://kongdjie-cooffee.onrender.com/api";
 let products = [];
 let cart = [];
 let currentCategory = "All";
