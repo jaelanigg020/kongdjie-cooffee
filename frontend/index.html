@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kong Djie Coffee — POS</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        rvDark: '#191c1f',
+                        rvSurface: '#f4f4f4',
+                        rvBlue: '#494fdf',
+                        rvTeal: '#00a87e',
+                        rvDanger: '#e23b4a',
+                        rvGray: '#8d969e',
+                        rvBorder: '#e2e4e8',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="h-screen flex flex-col overflow-hidden select-none relative bg-[#f8f9fa]">
+
+    <!-- Background Watermark Logo -->
+    <div class="fixed inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
+        <img src="/logo.png" alt="Watermark" class="w-[650px] h-[650px] object-contain opacity-[0.045] grayscale select-none filter contrast-125">
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white border-b border-rvBorder px-8 py-4 flex justify-between items-center z-20">
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-3">
+                <img src="/logo.png" alt="Logo" class="w-10 h-10 object-contain rounded-full border border-rvBorder bg-white p-0.5">
+                <span class="font-bold text-lg tracking-tight text-rvDark">Kong Djie Coffee</span>
+            </div>
+            <div class="h-4 w-[1px] bg-rvBorder"></div>
+            <nav class="flex gap-2">
+                <button onclick="switchView('pos')" id="tab-pos" class="pill-btn px-5 py-2 text-xs font-semibold bg-rvDark text-white">POS Kasir</button>
+                <button onclick="switchView('orders')" id="tab-orders" class="pill-btn px-5 py-2 text-xs font-semibold bg-rvSurface text-rvDark hover:bg-slate-200">Riwayat & Transaksi</button>
+                <button onclick="switchView('admin')" id="tab-admin" class="pill-btn px-5 py-2 text-xs font-semibold bg-rvSurface text-rvDark hover:bg-slate-200">Kelola Produk</button>
+            </nav>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 bg-rvSurface px-4 py-1.5 rounded-full border border-rvBorder">
+                <span class="w-2 h-2 rounded-full bg-rvTeal animate-pulse"></span>
+                <span class="text-xs font-semibold text-rvDark">EDC BCA Terminal: Ready</span>
+            </div>
+            <div class="text-xs font-medium text-rvGray">Kasir: <strong class="text-rvDark">Jaelani</strong></div>
+        </div>
+    </header>
+
+    <!-- Workspace -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- POS VIEW -->
+        <section id="view-pos" class="flex-1 flex w-full h-full">
+            <!-- Left Catalog -->
+            <div class="flex-1 flex flex-col p-6 overflow-hidden">
+                
+                <!-- Category Pills -->
+                <div class="flex gap-2 mb-6 overflow-x-auto custom-scroll pb-1">
+                    <button onclick="filterCategory('All')" class="cat-pill active pill-btn px-6 py-2.5 text-xs font-bold bg-rvDark text-white whitespace-nowrap">Semua Menu</button>
+                    <button onclick="filterCategory('Coffee')" class="cat-pill pill-btn px-6 py-2.5 text-xs font-semibold bg-white border border-rvBorder text-rvDark hover:bg-rvSurface whitespace-nowrap">Coffee</button>
+                    <button onclick="filterCategory('Non-Coffee')" class="cat-pill pill-btn px-6 py-2.5 text-xs font-semibold bg-white border border-rvBorder text-rvDark hover:bg-rvSurface whitespace-nowrap">Non-Coffee</button>
+                    <button onclick="filterCategory('Pastry')" class="cat-pill pill-btn px-6 py-2.5 text-xs font-semibold bg-white border border-rvBorder text-rvDark hover:bg-rvSurface whitespace-nowrap">Pastry</button>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="flex-1 overflow-y-auto custom-scroll grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pb-8" id="product-grid">
+                    <!-- Dynamic Product Cards -->
+                </div>
+            </div>
+
+            <!-- Right Cart Panel -->
+            <div class="w-[420px] bg-white border-l border-rvBorder flex flex-col h-full z-10">
+                <!-- Order Type & Table Selection -->
+                <div class="p-6 border-b border-rvBorder space-y-4">
+                    <div class="flex bg-rvSurface p-1 rounded-full border border-rvBorder">
+                        <button onclick="setOrderType('Dine In')" id="type-dinein" class="pill-btn flex-1 py-2 text-xs font-bold bg-white text-rvDark">Dine In</button>
+                        <button onclick="setOrderType('Take Away')" id="type-takeaway" class="pill-btn flex-1 py-2 text-xs font-semibold text-rvGray hover:text-rvDark">Take Away</button>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-semibold text-rvGray uppercase tracking-wider">No. Meja</span>
+                        <input type="text" id="order-table" value="04" class="w-20 px-3 py-1.5 bg-rvSurface rounded-xl border border-rvBorder text-center font-bold text-sm text-rvDark focus:outline-rvBlue">
+                    </div>
+                </div>
+
+                <!-- Items List -->
+                <div class="flex-1 overflow-y-auto p-6 space-y-3 custom-scroll" id="cart-list">
+                    <div class="text-center py-20 text-rvGray text-xs font-medium">Belum ada item dipilih</div>
+                </div>
+
+                <!-- Totals & Checkout -->
+                <div class="p-6 bg-rvSurface/40 border-t border-rvBorder space-y-3">
+                    <div class="flex justify-between text-xs font-medium text-rvGray">
+                        <span>Subtotal</span>
+                        <span id="txt-subtotal" class="text-rvDark font-semibold">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between text-xs font-medium text-rvGray">
+                        <span>PB1 (10%)</span>
+                        <span id="txt-tax" class="text-rvDark font-semibold">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between items-baseline pt-3 border-t border-rvBorder">
+                        <span class="text-sm font-bold text-rvDark">Total Bayar</span>
+                        <span id="txt-total" class="text-2xl font-extrabold text-rvDark tracking-tight">Rp 0</span>
+                    </div>
+
+                    <!-- Payment Action Pills -->
+                    <div class="grid grid-cols-2 gap-3 pt-3">
+                        <button onclick="openPaymentModal('Cash')" class="pill-btn py-3.5 bg-rvSurface hover:bg-slate-200 border border-rvBorder text-rvDark font-bold text-xs flex items-center justify-center gap-2">
+                            <i data-lucide="banknote" class="w-4 h-4"></i> Tunai (Cash)
+                        </button>
+                        <button onclick="openPaymentModal('EDC BCA')" class="pill-btn py-3.5 bg-rvDark hover:bg-black text-white font-bold text-xs flex items-center justify-center gap-2">
+                            <i data-lucide="credit-card" class="w-4 h-4"></i> EDC BCA / QRIS
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ORDERS VIEW -->
+        <section id="view-orders" class="hidden flex-1 p-8 overflow-y-auto custom-scroll">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight text-rvDark">Riwayat Order & Dapur</h2>
+                    <p class="text-xs text-rvGray">Semua transaksi terekam dan terhubung langsung ke database.</p>
+                </div>
+                <a href="/api/reports/export-excel" target="_blank" class="pill-btn px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Download Excel (.xlsx)
+                </a>
+            </div>
+            <div class="bg-white rounded-3xl border border-rvBorder overflow-hidden">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-rvSurface text-rvGray border-b border-rvBorder">
+                        <tr>
+                            <th class="p-4 font-bold uppercase tracking-wider">No. Order</th>
+                            <th class="p-4 font-bold uppercase tracking-wider">Waktu</th>
+                            <th class="p-4 font-bold uppercase tracking-wider">Tipe</th>
+                            <th class="p-4 font-bold uppercase tracking-wider">Item Pesanan</th>
+                            <th class="p-4 font-bold uppercase tracking-wider">Total</th>
+                            <th class="p-4 font-bold uppercase tracking-wider">Metode</th>
+                            <th class="p-4 font-bold uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-tbody" class="divide-y divide-rvBorder"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ADMIN VIEW -->
+        <section id="view-admin" class="hidden flex-1 p-8 overflow-y-auto custom-scroll flex gap-8">
+            <!-- Form -->
+            <div class="w-[380px] bg-white p-6 rounded-3xl border border-rvBorder h-fit space-y-4">
+                <h3 class="text-lg font-bold text-rvDark tracking-tight">Tambah Produk</h3>
+                <div>
+                    <label class="block text-[11px] font-bold text-rvGray uppercase mb-1">Nama Menu</label>
+                    <input type="text" id="p-name" placeholder="Misal: Flat White" class="w-full px-4 py-2.5 bg-rvSurface border border-rvBorder rounded-xl text-xs font-medium focus:outline-rvBlue">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-rvGray uppercase mb-1">Kategori</label>
+                    <select id="p-cat" class="w-full px-4 py-2.5 bg-rvSurface border border-rvBorder rounded-xl text-xs font-medium focus:outline-rvBlue">
+                        <option value="Coffee">Coffee</option>
+                        <option value="Non-Coffee">Non-Coffee</option>
+                        <option value="Pastry">Pastry</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-rvGray uppercase mb-1">Harga (Rp)</label>
+                    <input type="number" id="p-price" placeholder="32000" class="w-full px-4 py-2.5 bg-rvSurface border border-rvBorder rounded-xl text-xs font-medium focus:outline-rvBlue">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-rvGray uppercase mb-1">Stok Awal</label>
+                    <input type="number" id="p-stock" value="50" class="w-full px-4 py-2.5 bg-rvSurface border border-rvBorder rounded-xl text-xs font-medium focus:outline-rvBlue">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-rvGray uppercase mb-1">Foto Menu</label>
+                    <input type="file" id="p-file" accept="image/*" class="w-full text-xs text-rvGray file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-rvDark file:text-white hover:file:bg-black">
+                </div>
+                <button onclick="submitNewProduct()" class="pill-btn w-full py-3.5 bg-rvDark hover:bg-black text-white font-bold text-xs tracking-tight">Simpan ke Menu</button>
+            </div>
+
+            <!-- List -->
+            <div class="flex-1 bg-white p-6 rounded-3xl border border-rvBorder">
+                <h3 class="text-lg font-bold text-rvDark tracking-tight mb-4">Daftar Menu Aktif</h3>
+                <div class="overflow-y-auto max-h-[600px] custom-scroll">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-rvSurface text-rvGray border-b border-rvBorder">
+                            <tr>
+                                <th class="p-3">Foto</th>
+                                <th class="p-3">Nama Menu</th>
+                                <th class="p-3">Kategori</th>
+                                <th class="p-3">Harga</th>
+                                <th class="p-3">Stok</th>
+                                <th class="p-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-product-tbody" class="divide-y divide-rvBorder"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-3xl p-8 w-[440px] border border-rvBorder space-y-6">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-xl tracking-tight text-rvDark" id="modal-title">Pembayaran</h3>
+                <button onclick="closePaymentModal()" class="w-8 h-8 rounded-full bg-rvSurface flex items-center justify-center text-rvGray hover:text-rvDark"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+
+            <div class="text-center py-3 bg-rvSurface rounded-2xl border border-rvBorder">
+                <p class="text-[11px] text-rvGray font-bold uppercase tracking-wider">Total Pembayaran</p>
+                <p class="text-3xl font-extrabold text-rvDark tracking-tight mt-1" id="modal-total-amt">Rp 0</p>
+            </div>
+
+            <!-- Cash Input -->
+            <div id="modal-cash-sec" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-rvGray mb-1">Nominal Tunai Diterima</label>
+                    <input type="number" id="input-cash-amt" oninput="calcChange()" placeholder="0" class="w-full px-4 py-3 bg-rvSurface border border-rvBorder rounded-2xl text-xl font-bold text-rvDark focus:outline-rvBlue">
+                </div>
+                
+                <!-- Quick Cash Presets -->
+                <div class="grid grid-cols-4 gap-2 pt-1" id="cash-presets">
+                    <button type="button" onclick="setExactCash()" class="pill-btn py-1.5 bg-rvSurface hover:bg-slate-200 border border-rvBorder text-[11px] font-bold text-rvDark">Uang Pas</button>
+                    <button type="button" onclick="addCashPreset(50000)" class="pill-btn py-1.5 bg-rvSurface hover:bg-slate-200 border border-rvBorder text-[11px] font-bold text-rvDark">50.000</button>
+                    <button type="button" onclick="addCashPreset(100000)" class="pill-btn py-1.5 bg-rvSurface hover:bg-slate-200 border border-rvBorder text-[11px] font-bold text-rvDark">100.000</button>
+                    <button type="button" onclick="addCashPreset(200000)" class="pill-btn py-1.5 bg-rvSurface hover:bg-slate-200 border border-rvBorder text-[11px] font-bold text-rvDark">200.000</button>
+                </div>
+
+                <div class="flex justify-between items-center text-xs p-3.5 bg-slate-50 border border-slate-100 rounded-2xl">
+                    <span class="text-rvGray font-semibold">Uang Kembalian:</span>
+                    <span id="modal-change-amt" class="font-extrabold text-base text-rvTeal">Rp 0</span>
+                </div>
+            </div>
+
+            <!-- EDC BCA Push Screen -->
+            <div id="modal-edc-sec" class="hidden text-center space-y-4 p-6 bg-blue-50/50 border border-blue-100 rounded-2xl">
+                <div class="w-12 h-12 bg-rvBlue text-white rounded-full flex items-center justify-center mx-auto shadow-md">
+                    <i data-lucide="credit-card" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-sm text-rvDark">Terminal EDC BCA Aktif</p>
+                    <p class="text-xs text-rvGray mt-1 leading-relaxed">Nominal otomatis dikirim ke mesin EDC.<br>Pelanggan bisa <strong>Tap / Insert Kartu</strong> atau <strong>Scan QRIS Dinamis</strong> di layar EDC.</p>
+                </div>
+                <div class="flex items-center justify-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span>
+                    <span class="pill-btn inline-block px-4 py-1.5 bg-blue-100 text-rvBlue text-[11px] font-bold">Menunggu Konfirmasi EDC BCA...</span>
+                </div>
+            </div>
+
+            <button onclick="executePayment()" class="pill-btn w-full py-4 bg-rvDark hover:bg-black text-white font-bold text-xs tracking-tight">Selesaikan Transaksi & Cetak Struk</button>
+        </div>
+    </div>
+
+    <!-- App Logic JS -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --rv-dark: #191c1f;
+    --rv-surface: #f4f4f4;
+    --rv-blue: #494fdf;
+    --rv-teal: #00a87e;
+    --rv-danger: #e23b4a;
+    --rv-gray: #8d969e;
+    --rv-border: #e2e4e8;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8f9fa;
+    color: var(--rv-dark);
+}
+
+.pill-btn {
+    border-radius: 9999px;
+    transition: all 0.15s ease-in-out;
+}
+
+.custom-scroll::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 9999px;
+}
